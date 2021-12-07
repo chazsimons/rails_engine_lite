@@ -58,11 +58,11 @@ RSpec.describe 'Merchant Request' do
     end
   end
 
-  xit 'returns 404 if no items are found' do
-    merchant = Merchant.create({name: "Big Dave's House of Pickles"})
-    get "/api/v1/merchants/#{merchant.id}/items"
-
-    expect(response.status).to eq(404)
-    expect(response.body).to eq("No items were found for merchant with id:#{merchant.id}")
-  end
+  # xit 'returns 404 if no items are found' do
+  #   merchant = Merchant.create({name: "Big Dave's House of Pickles"})
+  #   get "/api/v1/merchants/#{merchant.id}/items"
+  #
+  #   expect(response.status).to eq(404)
+  #   expect(response.body).to eq("No items were found for merchant with id:#{merchant.id}")
+  # end
 end

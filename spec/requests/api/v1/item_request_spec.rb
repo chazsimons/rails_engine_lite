@@ -34,7 +34,7 @@ RSpec.describe 'Item Requests' do
     expect(response).to be_successful
 
     item = JSON.parse(response.body, symbolize_names: true)
-    # require "pry"; binding.pry
+    
     expect(item[:data]).to have_key(:id)
     expect(item[:data][:id]).to be_a(String)
     expect(item[:data][:attributes]).to have_key(:name)
@@ -86,5 +86,15 @@ RSpec.describe 'Item Requests' do
     expect(response).to be_successful
     expect(response.status).to eq(204)
     expect(response.body).to be_empty
+  end
+
+  it 'can send the items merchant information' do
+    merchant = Merchant.create({name: "Haha's Funny Books"})
+    item = merchant.items.create({"name": 'Avengers 1', "description": 'The very first issue of Avengers', 'unit_price': 1964.99})
+    item_2 = merchant.items.create({"name": 'Avengers 700', "description": 'The 700th issue of Avengers', 'unit_price': 9.99})
+
+    get "/api/v1/items/#{item.id}/merchant"
+
+    expect(response).to be_successful
   end
 end
