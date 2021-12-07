@@ -40,7 +40,7 @@ RSpec.describe 'Merchant Request' do
     get "/api/v1/merchants/#{merchant.id}/items"
 
     items = JSON.parse(response.body, symbolize_names: true)
-    
+
     expect(items.count).to eq(2)
     items.each do |item|
       expect(item).to have_key(:id)
@@ -53,5 +53,13 @@ RSpec.describe 'Merchant Request' do
       expect(item[:merchant_id]).to be_a(Integer)
       expect(item[:merchant_id]).to eq(merchant.id)
     end
+  end
+
+  xit 'returns 404 if no items are found' do
+    merchant = Merchant.create({name: "Big Dave's House of Pickles"})
+    get "/api/v1/merchants/#{merchant.id}/items"
+
+    expect(response.status).to eq(404)
+    expect(response.body).to eq("No items were found for merchant with id:#{merchant.id}")
   end
 end
