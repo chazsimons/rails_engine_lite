@@ -72,7 +72,19 @@ RSpec.describe 'Item Requests' do
 
     parsed = JSON.parse(response.body, symbolize_names: true)
     updated_item = parsed[:data][:attributes]
-    
+
     expect(updated_item[:unit_price]).to eq(20_000.01)
+  end
+
+  it 'can delete a single item' do
+    merchant = Merchant.create({name: "Haha's Funny Books"})
+    item = merchant.items.create({"name": 'Avengers 1', "description": 'The very first issue of Avengers', 'unit_price': 1964.99})
+    item_2 = merchant.items.create({"name": 'Avengers 700', "description": 'The 700th issue of Avengers', 'unit_price': 9.99})
+
+    delete "/api/v1/items/#{item_2.id}"
+
+    expect(response).to be_successful
+    expect(response.status).to eq(204)
+    expect(response.body).to be_empty
   end
 end
