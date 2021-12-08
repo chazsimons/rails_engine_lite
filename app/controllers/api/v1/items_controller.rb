@@ -5,19 +5,23 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def show
-    if params[:id] == 'find_all'
-      if params[:name] == ""
-        render json: { error: "A name must be provided to search" }, status: 400
-      else
-        render json: ItemSerializer.new(Item.search(params[:name]))
-      end
+    render json: ItemSerializer.new(Item.find(params[:id]))
+  end
+
+  def find_all
+    if params[:name] == ""
+      render json: { errors: { details: "A name must be provided to search" }}, status: 400
     else
-      render json: ItemSerializer.new(Item.find(params[:id]))
+      render json: ItemSerializer.new(Item.search(params[:name]))
     end
   end
 
   def create
-    render json: ItemSerializer.new(Item.create(item_params)), status: 201
+    if Item.new(item_params).save
+      render json: ItemSerializer.new(Item.create(item_params)), status: 201
+    else
+      render json: {errors: {details: "Unable to create item. Please provide name, description, and unit price"}}, status: 400
+    end
   end
 
   def update

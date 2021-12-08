@@ -2,15 +2,18 @@ require 'rails_helper'
 
 RSpec.describe 'Item Requests' do
   it 'can send a list of items' do
-    create_list(:merchant, 10)
-    create_list(:item, 10)
+    merchant = Merchant.create({name: "Haha's Funny Books"})
+    item_1 = merchant.items.create({"name": 'Avengers 1', "description": 'The very first issue of Avengers', 'unit_price': 1964.99})
+    item_2 = merchant.items.create({"name": 'Young Avengers', "description": 'The next generation is here!', 'unit_price': 29.99})
+    item_3 = merchant.items.create({"name": 'Watchmen', "description": 'The ground breaking graphic novel.', 'unit_price': 19.99})
+    item_4 = merchant.items.create({"name": 'Hawkeye', "description": 'Now a show on Disney+', 'unit_price': 19.99})
 
     get '/api/v1/items'
 
     expect(response).to be_successful
     parsed = JSON.parse(response.body, symbolize_names: true)
     items = parsed[:data]
-    expect(items.count).to eq(10)
+    expect(items.count).to eq(4)
 
     items.each do |item|
       expect(item).to have_key(:id)
@@ -58,6 +61,19 @@ RSpec.describe 'Item Requests' do
     expect(new_item.description).to eq(item_params[:description])
     expect(new_item.unit_price).to eq(item_params[:unit_price])
     expect(new_item.merchant_id).to eq(item_params[:merchant_id])
+  end
+
+  it 'returns an error if not provided all attributes' do
+    merchant = Merchant.create({name: "Lots o' Comics"})
+    item_params = {"name": 'Avengers 1', "description": 'The very first issue of Avengers', "merchant_id": merchant.id}
+    headers = {"CONTENT_TYPE" => "application/json"}
+
+    post "/api/v1/items", headers: headers, params: JSON.generate(item: item_params)
+
+    parsed = JSON.parse(response.body, symbolize_names: true)
+    expect(response.status).to eq(400)
+    expect(parsed).to have_key(:errors)
+    expect(parsed[:errors][:details]).to eq("Unable to create item. Please provide name, description, and unit price")
   end
 
   it 'can update a single item' do
@@ -129,8 +145,9 @@ RSpec.describe 'Item Requests' do
     get "/api/v1/items/find_all?name="
 
     expect(response.status).to eq(400)
-
     parsed = JSON.parse(response.body, symbolize_names: true)
-    expect(parsed[:error]).to be_a(String)
+    expect(parsed).to have_key(:errors)
+    expect(parsed[:errors][:details]).to be_a(String)
+    expect(parsed[:errors][:details]).to eq("A name must be provided to search")
   end
 end

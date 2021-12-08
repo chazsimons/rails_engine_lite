@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe Item do
+
   describe '#class_methods' do
     it 'can perform a case-insensitive keyword search by name' do
       merchant = Merchant.create({name: "Haha's Funny Books"})
