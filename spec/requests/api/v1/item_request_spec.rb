@@ -34,7 +34,7 @@ RSpec.describe 'Item Requests' do
     expect(response).to be_successful
 
     item = JSON.parse(response.body, symbolize_names: true)
-    
+
     expect(item[:data]).to have_key(:id)
     expect(item[:data][:id]).to be_a(String)
     expect(item[:data][:attributes]).to have_key(:name)
@@ -96,5 +96,41 @@ RSpec.describe 'Item Requests' do
     get "/api/v1/items/#{item.id}/merchant"
 
     expect(response).to be_successful
+  end
+
+  it 'can find all items matching a searched name' do
+    merchant = Merchant.create({name: "Haha's Funny Books"})
+    item_1 = merchant.items.create({"name": 'Avengers 1', "description": 'The very first issue of Avengers', 'unit_price': 1964.99})
+    item_2 = merchant.items.create({"name": 'Young Avengers', "description": 'The next generation is here!', 'unit_price': 29.99})
+    item_3 = merchant.items.create({"name": 'Watchmen', "description": 'The ground breaking graphic novel.', 'unit_price': 19.99})
+    item_4 = merchant.items.create({"name": 'Hawkeye', "description": 'Now a show on Disney+', 'unit_price': 19.99})
+
+    get "/api/v1/items/find_all?name=avengers"
+
+    expect(response).to be_successful
+    parsed = JSON.parse(response.body, symbolize_names: true)
+    found_items = parsed[:data]
+
+    found_items.each do |item|
+      expect(item).to have_key(:id)
+      expect(item[:id]).to be_a(String)
+      expect(item[:attributes]).to have_key(:name)
+      expect(item[:attributes][:name]).to be_a(String)
+    end
+  end
+
+  it 'returns an error if no name is provided' do
+    merchant = Merchant.create({name: "Haha's Funny Books"})
+    item_1 = merchant.items.create({"name": 'Avengers 1', "description": 'The very first issue of Avengers', 'unit_price': 1964.99})
+    item_2 = merchant.items.create({"name": 'Young Avengers', "description": 'The next generation is here!', 'unit_price': 29.99})
+    item_3 = merchant.items.create({"name": 'Watchmen', "description": 'The ground breaking graphic novel.', 'unit_price': 19.99})
+    item_4 = merchant.items.create({"name": 'Hawkeye', "description": 'Now a show on Disney+', 'unit_price': 19.99})
+
+    get "/api/v1/items/find_all?name="
+
+    expect(response.status).to eq(400)
+
+    parsed = JSON.parse(response.body, symbolize_names: true)
+    expect(parsed[:error]).to be_a(String)
   end
 end
