@@ -3,6 +3,6 @@ class Item < ApplicationRecord
   validates_presence_of :name, :description, :unit_price
 
   def self.search(search_name)
-    where("name ILIKE ?", "%#{search_name.downcase}%").order('name asc')
+    where("name ILIKE ?", "%#{search_name}%").order('name asc')
   end
 end

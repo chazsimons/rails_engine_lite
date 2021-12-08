@@ -29,7 +29,7 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def destroy
-    render json: Item.destroy(params[:id])
+    render json: Item.destroy(params[:id]), status: 204
     head :no_content
   end
 

@@ -13,8 +13,10 @@ class Api::V1::MerchantsController < ApplicationController
   end
 
   def find
-    if params[:name] == ""
+    if params[:name] == "" || params.include?(:name) != true
       render json: { errors: {details: "A name must be provided to search" }}, status: 400
+    elsif Merchant.search(params[:name]).nil?
+      render json: { data: { details: "No merchant found!" } }, status: 404
     else
       render json: MerchantSerializer.new(Merchant.search(params[:name]))
     end
