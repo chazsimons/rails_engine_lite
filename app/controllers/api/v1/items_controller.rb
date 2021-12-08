@@ -5,7 +5,15 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def show
-    render json: ItemSerializer.new(Item.find(params[:id]))
+    if params[:id] == 'find_all'
+      if params[:name] == ""
+        render json: { error: "A name must be provided to search" }, status: 400
+      else
+        render json: ItemSerializer.new(Item.search(params[:name]))
+      end
+    else
+      render json: ItemSerializer.new(Item.find(params[:id]))
+    end
   end
 
   def create

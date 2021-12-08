@@ -58,11 +58,38 @@ RSpec.describe 'Merchant Request' do
     end
   end
 
-  # xit 'returns 404 if no items are found' do
-  #   merchant = Merchant.create({name: "Big Dave's House of Pickles"})
-  #   get "/api/v1/merchants/#{merchant.id}/items"
-  #
-  #   expect(response.status).to eq(404)
-  #   expect(response.body).to eq("No items were found for merchant with id:#{merchant.id}")
-  # end
+  it 'can find a single merchant that matches search terms' do
+    merchant_1 = Merchant.create({name: "Big Dave's House of Pickles"})
+    merchant_2 = Merchant.create({name: "Bigger Dave's Pickle Palace"})
+    merchant_3 = Merchant.create({name: "Lots o' Comics"})
+    merchant_4 = Merchant.create({name: "Haha's Funny Books"})
+    merchant_5 = Merchant.create({name: "Kindo' alot of Books"})
+
+    get "/api/v1/merchants/find?name=books"
+
+    parsed = JSON.parse(response.body, symbolize_names: true)
+    found_merchant = parsed[:data]
+
+    expect(response).to be_successful
+    expect(found_merchant[:id]).to be_a(String)
+    expect(found_merchant[:attributes][:name]).to eq(merchant_4.name)
+  end
+
+    it 'returns an error if no merchant is provided' do
+      merchant_3 = Merchant.create({name: "Lots o' Comics"})
+      merchant_4 = Merchant.create({name: "Haha's Funny Books"})
+      merchant_5 = Merchant.create({name: "Kindo' alot of Books"})
+
+      get "/api/v1/merchants/find?name="
+
+      expect(response.status).to eq(400)
+    end
+
+  xit 'returns 404 if no items are found' do
+    merchant = Merchant.create({name: "Big Dave's House of Pickles"})
+    get "/api/v1/merchants/#{merchant.id}/items"
+
+    expect(response.status).to eq(404)
+    expect(response.body).to eq("No items were found for merchant with id:#{merchant.id}")
+  end
 end
