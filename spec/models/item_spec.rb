@@ -20,10 +20,14 @@ RSpec.describe Item do
       item_4 = merchant.items.create({"name": 'Hawkeye', "description": 'Now a show on Disney+', 'unit_price': 19.99})
 
 
-      results = Item.search("aven")
-      expected = [item_1, item_2]
+      one_result = Item.search("aven")
+      one_expected = item_1
 
-      expect(results).to eq(expected)
+      many_results = Item.search_all("aven")
+      many_expected = [item_1, item_2]
+
+      expect(one_result).to eq(one_expected)
+      expect(many_results).to eq(many_expected)
     end
 
     it 'can search by prices' do
