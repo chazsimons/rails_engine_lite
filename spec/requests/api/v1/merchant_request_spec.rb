@@ -111,7 +111,7 @@ RSpec.describe 'Merchant Request' do
     expect(parsed).to have_key(:data)
     expect(parsed[:data][:details]).to eq("No merchant found!")
   end
-  
+
   it 'returns an error if no merchant is provided' do
     merchant_3 = Merchant.create({name: "Lots o' Comics"})
     merchant_4 = Merchant.create({name: "Haha's Funny Books"})
@@ -137,5 +137,52 @@ RSpec.describe 'Merchant Request' do
     expect(response.status).to eq(400)
     expect(parsed).to have_key(:errors)
     expect(parsed[:errors][:details]).to eq('A name must be provided to search')
+  end
+
+  it 'can find all merchants matching a keyword' do
+    merchant_1 = Merchant.create({name: "Big Dave's House of Pickles"})
+    merchant_2 = Merchant.create({name: "Bigger Dave's Pickle Palace"})
+    merchant_3 = Merchant.create({name: "Pick yo' Comics"})
+    merchant_4 = Merchant.create({name: "Haha's Funny Books"})
+
+    get "/api/v1/merchants/find_all?name=pick"
+
+    parsed = JSON.parse(response.body, symbolize_names: true)
+    found_merchants = parsed[:data]
+
+    expect(response).to be_successful
+    found_merchants.each do |merchant|
+      expect(merchant).to have_key(:id)
+      expect(merchant[:id]).to be_a(String)
+      expect(merchant[:attributes]).to have_key(:name)
+      expect(merchant[:attributes][:name]).to be_a(String)
+    end
+  end
+
+  it 'returns an empty array if no merchants were found' do
+    merchant_1 = Merchant.create({name: "Big Dave's House of Pickles"})
+    merchant_2 = Merchant.create({name: "Bigger Dave's Pickle Palace"})
+    merchant_3 = Merchant.create({name: "Pick yo' Comics"})
+    merchant_4 = Merchant.create({name: "Haha's Funny Books"})
+
+    get "/api/v1/merchants/find_all?name=diamond"
+
+    parsed = JSON.parse(response.body, symbolize_names: true)
+    found_merchants = parsed[:data]
+
+    expect(response.status).to eq(404)
+    expect(found_merchants).to eq([])
+    # expect(found_merchants[:details]).to eq("No merchant(s) found!")
+  end
+
+  it 'returns an error if no data is provided to search' do
+    merchant_1 = Merchant.create({name: "Big Dave's House of Pickles"})
+    merchant_2 = Merchant.create({name: "Bigger Dave's Pickle Palace"})
+    get "/api/v1/merchants/find_all?name="
+
+    parsed = JSON.parse(response.body, symbolize_names: true)
+    expect(response.status).to eq(400)
+    expect(parsed).to have_key(:errors)
+    expect(parsed[:errors][:details]).to eq("A name must be provided to search")
   end
 end
