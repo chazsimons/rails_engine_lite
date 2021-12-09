@@ -1,5 +1,4 @@
 class Api::V1::ItemsController < ApplicationController
-
   def index
     render json: ItemSerializer.new(Item.all)
   end
@@ -10,15 +9,15 @@ class Api::V1::ItemsController < ApplicationController
 
   def find
     if params[:name].present? && params[:min_price].present? || params[:max_price].present? && params[:name].present?
-      render json: {errors: { details: "Must search by name OR price"}}, status: 403
-    elsif params[:min_price] != nil || params[:max_price] != nil
+      render json: { errors: { details: 'Must search by name OR price' } }, status: 403
+    elsif !params[:min_price].nil? || !params[:max_price].nil?
       render json: ItemSerializer.new(Item.price_search(params))
     end
   end
 
   def find_all
-    if params[:name] == ""
-      render json: { errors: { details: "A name must be provided to search" }}, status: 400
+    if params[:name] == ''
+      render json: { errors: { details: 'A name must be provided to search' } }, status: 400
     else
       render json: ItemSerializer.new(Item.search(params[:name]))
     end
@@ -28,7 +27,8 @@ class Api::V1::ItemsController < ApplicationController
     if Item.new(item_params).save
       render json: ItemSerializer.new(Item.create(item_params)), status: 201
     else
-      render json: {errors: {details: "Unable to create item. Please provide name, description, and unit price"}}, status: 400
+      render json: { errors: { details: 'Unable to create item. Please provide name, description, and unit price' } },
+             status: 400
     end
   end
 
@@ -42,6 +42,7 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   private
+
   def item_params
     params.require(:item).permit(:name, :description, :unit_price, :merchant_id)
   end
