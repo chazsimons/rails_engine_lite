@@ -11,6 +11,8 @@ class Api::V1::ItemsController < ApplicationController
   def find_all
     if params[:name] == ""
       render json: { errors: { details: "A name must be provided to search" }}, status: 400
+    elsif params[:min_price] != nil || params[:max_price] != nil
+      render json: ItemSerializer.new(Item.price_search(params))
     else
       render json: ItemSerializer.new(Item.search(params[:name]))
     end
