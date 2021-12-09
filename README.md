@@ -1,9 +1,9 @@
 <!-- PROJECT LOGO -->
 <br />
-![little rails engine](https://user-images.githubusercontent.com/85699215/145460175-60d4a051-6511-47b8-99a6-e3468a6a00c1.jpeg)
+<img src="https://user-images.githubusercontent.com/85699215/145460175-60d4a051-6511-47b8-99a6-e3468a6a00c1.jpeg" alt="Little Rails Engine That Could" width="300" height="300">
 
 
-<h3 align="center">Rails Engine Lite</h3>
+<h1 align="center">Rails Engine Lite</h1>
 
   <p align="center">
     <br />
