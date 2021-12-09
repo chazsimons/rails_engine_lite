@@ -8,9 +8,9 @@ class Item < ApplicationRecord
 
   def self.price_search(prices)
     if prices.include?(:min_price) && prices.include?(:max_price) == false
-      where("unit_price > ?", prices[:min_price].to_f).order("name asc")
+      where("unit_price >= ?", prices[:min_price].to_f).order("name asc")
     elsif prices.include?(:max_price) && prices.include?(:min_price) == false
-      where("unit_price < ?", prices[:max_price].to_f).order("name asc")
+      where("unit_price <= ?", prices[:max_price].to_f).order("name asc")
     elsif prices.include?(:min_price) && prices.include?(:max_price)
       where("unit_price BETWEEN ? AND ?", prices[:min_price].to_f, prices[:max_price].to_f).order("name asc")
     end
