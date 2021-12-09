@@ -35,7 +35,6 @@ RSpec.describe Item do
 
       minimum = Item.price_search({min_price: 9.99})
       min_expected = [item_1, item_4, item_3, item_2]
-      # require "pry"; binding.pry
       expect(minimum).to eq(min_expected)
 
       maximum = Item.price_search({max_price: 100.00})
