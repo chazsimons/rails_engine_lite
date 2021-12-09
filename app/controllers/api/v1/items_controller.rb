@@ -13,14 +13,20 @@ class Api::V1::ItemsController < ApplicationController
       render json: {errors: { details: "Must search by name OR price"}}, status: 403
     elsif params[:min_price] != nil || params[:max_price] != nil
       render json: ItemSerializer.new(Item.price_search(params))
+    elsif params[:name].present?
+      render json: ItemSerializer.new(Item.search(params[:name]))
     end
   end
 
   def find_all
-    if params[:name] == ""
+    if params[:name].present? && params[:min_price].present? || params[:max_price].present? && params[:name].present?
+      render json: {errors: { details: "Must search by name OR price"}}, status: 403
+    elsif params[:name] == ""
       render json: { errors: { details: "A name must be provided to search" }}, status: 400
+    elsif params[:min_price] != nil || params[:max_price] != nil
+      render json: ItemSerializer.new(Item.price_search(params))
     else
-      render json: ItemSerializer.new(Item.search(params[:name]))
+      render json: ItemSerializer.new(Item.search_all(params[:name]))
     end
   end
 
