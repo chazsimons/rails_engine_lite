@@ -9,8 +9,8 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def find
-    if params[:name].present? && params[:min_price]
-      render json: {errors: { details: "Must search by name OR price"}}
+    if params[:name].present? && params[:min_price].present? || params[:max_price].present? && params[:name].present?
+      render json: {errors: { details: "Must search by name OR price"}}, status: 403
     elsif params[:min_price] != nil || params[:max_price] != nil
       render json: ItemSerializer.new(Item.price_search(params))
     end

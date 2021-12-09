@@ -197,5 +197,11 @@ RSpec.describe 'Item Requests' do
     merchant = Merchant.create({name: "Haha's Funny Books"})
     item_1 = merchant.items.create({"name": 'Avengers 1', "description": 'The very first issue of Avengers', 'unit_price': 1964.99})
 
-
+    get "/api/v1/items/find?name=avengers&max_price=100"
+    parsed = JSON.parse(response.body, symbolize_names: true)
+    
+    expect(response.status).to eq(403)
+    expect(parsed).to have_key(:errors)
+    expect(parsed[:errors][:details]).to eq("Must search by name OR price")
+  end
 end
