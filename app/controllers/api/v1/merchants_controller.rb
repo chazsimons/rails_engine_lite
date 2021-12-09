@@ -5,14 +5,20 @@ class Api::V1::MerchantsController < ApplicationController
   end
 
   def show
-    if params[:id] == 'find'
-      if params[:name] == ""
-        render json: { error: "A name must be provided to search" }, status: 400
-      else
-        render json: MerchantSerializer.new(Merchant.search(params[:name]))
-      end
-    else
+    if Merchant.exists?(params[:id])
       render json: MerchantSerializer.new(Merchant.find(params[:id]))
+    else
+      render json: { errors: { details: "No merchant matches this id" }}, status: 404
+    end
+  end
+
+  def find
+    if params[:name] == "" || params.include?(:name) != true
+      render json: { errors: {details: "A name must be provided to search" }}, status: 400
+    elsif Merchant.search(params[:name]).nil?
+      render json: { data: { details: "No merchant found!" } }, status: 404
+    else
+      render json: MerchantSerializer.new(Merchant.search(params[:name]))
     end
   end
 end

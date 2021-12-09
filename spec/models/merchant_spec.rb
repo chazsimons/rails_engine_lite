@@ -1,6 +1,10 @@
 require 'rails_helper'
 
 RSpec.describe Merchant do
+  describe 'relationships' do
+    it { should have_many(:items) }
+  end
+  
   describe '#class_methods' do
     it 'returns a single merchant from a case-insensitive keyword search by name' do
       merchant_1 = Merchant.create({name: "Big Dave's House of Pickles"})

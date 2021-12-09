@@ -2,15 +2,18 @@ require 'rails_helper'
 
 RSpec.describe 'Item Requests' do
   it 'can send a list of items' do
-    create_list(:merchant, 10)
-    create_list(:item, 10)
+    merchant = Merchant.create({name: "Haha's Funny Books"})
+    item_1 = merchant.items.create({"name": 'Avengers 1', "description": 'The very first issue of Avengers', 'unit_price': 1964.99})
+    item_2 = merchant.items.create({"name": 'Young Avengers', "description": 'The next generation is here!', 'unit_price': 29.99})
+    item_3 = merchant.items.create({"name": 'Watchmen', "description": 'The ground breaking graphic novel.', 'unit_price': 19.99})
+    item_4 = merchant.items.create({"name": 'Hawkeye', "description": 'Now a show on Disney+', 'unit_price': 19.99})
 
     get '/api/v1/items'
 
     expect(response).to be_successful
     parsed = JSON.parse(response.body, symbolize_names: true)
     items = parsed[:data]
-    expect(items.count).to eq(10)
+    expect(items.count).to eq(4)
 
     items.each do |item|
       expect(item).to have_key(:id)
@@ -60,6 +63,19 @@ RSpec.describe 'Item Requests' do
     expect(new_item.merchant_id).to eq(item_params[:merchant_id])
   end
 
+  it 'returns an error if not provided all attributes' do
+    merchant = Merchant.create({name: "Lots o' Comics"})
+    item_params = {"name": 'Avengers 1', "description": 'The very first issue of Avengers', "merchant_id": merchant.id}
+    headers = {"CONTENT_TYPE" => "application/json"}
+
+    post "/api/v1/items", headers: headers, params: JSON.generate(item: item_params)
+
+    parsed = JSON.parse(response.body, symbolize_names: true)
+    expect(response.status).to eq(400)
+    expect(parsed).to have_key(:errors)
+    expect(parsed[:errors][:details]).to eq("Unable to create item. Please provide name, description, and unit price")
+  end
+
   it 'can update a single item' do
     merchant = Merchant.create({name: "Haha's Funny Books"})
     item = merchant.items.create({"name": 'Avengers 1', "description": 'The very first issue of Avengers', 'unit_price': 1964.99})
@@ -98,6 +114,19 @@ RSpec.describe 'Item Requests' do
     expect(response).to be_successful
   end
 
+  it 'sad path - no item is found when searching for merchant info' do
+    merchant = Merchant.create({name: "Haha's Funny Books"})
+    item_1 = merchant.items.create({"name": 'Avengers 1', "description": 'The very first issue of Avengers', 'unit_price': 1964.99})
+    invalid_id = item_1.id + 1
+
+    get "/api/v1/items/#{invalid_id}/merchant"
+    parsed = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response.status).to eq(404)
+    expect(parsed).to have_key(:errors)
+    expect(parsed[:errors][:details]).to eq("No item was found with id: #{invalid_id}")
+  end
+
   it 'can find all items matching a searched name' do
     merchant = Merchant.create({name: "Haha's Funny Books"})
     item_1 = merchant.items.create({"name": 'Avengers 1', "description": 'The very first issue of Avengers', 'unit_price': 1964.99})
@@ -119,6 +148,35 @@ RSpec.describe 'Item Requests' do
     end
   end
 
+  it 'can find all items by price' do
+    merchant = Merchant.create({name: "Haha's Funny Books"})
+    item_1 = merchant.items.create({"name": 'Avengers 1', "description": 'The very first issue of Avengers', 'unit_price': 1964.99})
+    item_2 = merchant.items.create({"name": 'Young Avengers', "description": 'The next generation is here!', 'unit_price': 29.99})
+    item_3 = merchant.items.create({"name": 'Watchmen', "description": 'The ground breaking graphic novel.', 'unit_price': 19.99})
+    item_4 = merchant.items.create({"name": 'Hawkeye', "description": 'Now a show on Disney+', 'unit_price': 19.99})
+
+    get "/api/v1/items/find_all?min_price=9.99"
+    minimum = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to be_successful
+    expect(minimum).to have_key(:data)
+    expect(minimum[:data].count).to eq(4)
+
+    get "/api/v1/items/find_all?max_price=25"
+    maximum = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to be_successful
+    expect(maximum).to have_key(:data)
+    expect(maximum[:data].count).to eq(2)
+
+    get "/api/v1/items/find_all?min_price=25&max_price=9999.99"
+    minmax = JSON.parse(response.body, symbolize_names: true)
+    
+    expect(response).to be_successful
+    expect(minmax).to have_key(:data)
+    expect(minmax[:data].count).to eq(2)
+  end
+
   it 'returns an error if no name is provided' do
     merchant = Merchant.create({name: "Haha's Funny Books"})
     item_1 = merchant.items.create({"name": 'Avengers 1', "description": 'The very first issue of Avengers', 'unit_price': 1964.99})
@@ -129,8 +187,9 @@ RSpec.describe 'Item Requests' do
     get "/api/v1/items/find_all?name="
 
     expect(response.status).to eq(400)
-
     parsed = JSON.parse(response.body, symbolize_names: true)
-    expect(parsed[:error]).to be_a(String)
+    expect(parsed).to have_key(:errors)
+    expect(parsed[:errors][:details]).to be_a(String)
+    expect(parsed[:errors][:details]).to eq("A name must be provided to search")
   end
 end
