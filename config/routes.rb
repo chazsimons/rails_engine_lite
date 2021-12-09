@@ -6,6 +6,7 @@ Rails.application.routes.draw do
         resources :items, controller: 'merchant_items', action: :index
       end
       get '/items/find_all', to: 'items#find_all'
+      get '/items/find', to: 'items#find'
       resources :items do
         resources :merchant, controller: 'merchant_items', action: :show
       end

@@ -155,23 +155,23 @@ RSpec.describe 'Item Requests' do
     item_3 = merchant.items.create({"name": 'Watchmen', "description": 'The ground breaking graphic novel.', 'unit_price': 19.99})
     item_4 = merchant.items.create({"name": 'Hawkeye', "description": 'Now a show on Disney+', 'unit_price': 19.99})
 
-    get "/api/v1/items/find_all?min_price=9.99"
+    get "/api/v1/items/find?min_price=9.99"
     minimum = JSON.parse(response.body, symbolize_names: true)
 
     expect(response).to be_successful
     expect(minimum).to have_key(:data)
     expect(minimum[:data].count).to eq(4)
 
-    get "/api/v1/items/find_all?max_price=25"
+    get "/api/v1/items/find?max_price=25"
     maximum = JSON.parse(response.body, symbolize_names: true)
 
     expect(response).to be_successful
     expect(maximum).to have_key(:data)
     expect(maximum[:data].count).to eq(2)
 
-    get "/api/v1/items/find_all?min_price=25&max_price=9999.99"
+    get "/api/v1/items/find?min_price=25&max_price=9999.99"
     minmax = JSON.parse(response.body, symbolize_names: true)
-    
+
     expect(response).to be_successful
     expect(minmax).to have_key(:data)
     expect(minmax[:data].count).to eq(2)
@@ -192,4 +192,10 @@ RSpec.describe 'Item Requests' do
     expect(parsed[:errors][:details]).to be_a(String)
     expect(parsed[:errors][:details]).to eq("A name must be provided to search")
   end
+
+  it 'returns an error if searching by name and price' do
+    merchant = Merchant.create({name: "Haha's Funny Books"})
+    item_1 = merchant.items.create({"name": 'Avengers 1', "description": 'The very first issue of Avengers', 'unit_price': 1964.99})
+
+
 end
