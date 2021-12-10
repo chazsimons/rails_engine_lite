@@ -13,7 +13,7 @@ class Api::V1::MerchantsController < ApplicationController
   end
 
   def find
-    if params[:name] == "" || params.include?(:name) != true
+    if params[:name] == "" || !params.include?(:name)
       render json: { errors: {details: "A name must be provided to search" }}, status: 400
     elsif Merchant.search(params[:name]).nil?
       render json: { data: { details: "No merchant found!" } }, status: 404
@@ -23,7 +23,7 @@ class Api::V1::MerchantsController < ApplicationController
   end
 
   def find_all
-    if params[:name] == "" || params.include?(:name) != true
+    if params[:name] == "" || !params.include?(:name)
       render json: { errors: {details: "A name must be provided to search" }}, status: 400
     elsif Merchant.search_all(params[:name]) == []
       render json: { data: [] }, status: 404

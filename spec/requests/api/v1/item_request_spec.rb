@@ -83,7 +83,6 @@ RSpec.describe 'Item Requests' do
     headers = {"CONTENT_TYPE" => "application/json"}
 
     patch "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate(item: update_params)
-
     expect(response).to be_successful
 
     parsed = JSON.parse(response.body, symbolize_names: true)
@@ -247,14 +246,14 @@ RSpec.describe 'Item Requests' do
     get "/api/v1/items/find?name=avengers&max_price=100"
     parsed = JSON.parse(response.body, symbolize_names: true)
 
-    expect(response.status).to eq(403)
+    expect(response.status).to eq(400)
     expect(parsed).to have_key(:errors)
     expect(parsed[:errors][:details]).to eq("Must search by name OR price")
 
     get "/api/v1/items/find_all?name=avengers&max_price=9999"
     find_all_parsed = JSON.parse(response.body, symbolize_names: true)
 
-    expect(response.status).to eq(403)
+    expect(response.status).to eq(400)
     expect(find_all_parsed).to have_key(:errors)
     expect(find_all_parsed[:errors][:details]).to eq("Must search by name OR price")
   end
